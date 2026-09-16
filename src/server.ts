@@ -36,12 +36,16 @@ const startServer = async () => {
       console.log('📅 Cron jobs are DISABLED (set ENABLE_CRON_JOBS=true to enable)');
     }
 
-    app.listen(PORT, () => {
-      console.log(`🚀 Server is running on port ${PORT}`);
-      console.log(`📍 Environment: ${process.env.NODE_ENV}`);
-      console.log(`🔗 Health check: http://localhost:${PORT}/health`);
-      console.log(`🔗 Test subscription expiry: http://localhost:${PORT}/api/subscriptions/check/expiring`);
-    });
+    // Vercel invokes this Express app as a serverless function and manages the listener.
+    // Keep the local listener code for normal Node.js development only.
+    if (!process.env.VERCEL) {
+      app.listen(PORT, () => {
+        console.log(`🚀 Server is running on port ${PORT}`);
+        console.log(`📍 Environment: ${process.env.NODE_ENV}`);
+        console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+        console.log(`🔗 Test subscription expiry: http://localhost:${PORT}/api/subscriptions/check/expiring`);
+      });
+    }
   } catch (error) {
     console.error('❌ Failed to start server:', error);
     process.exit(1);
@@ -55,4 +59,9 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
-startServer();
+// Local Node.js startup is disabled on Vercel; Vercel imports the exported app.
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;
