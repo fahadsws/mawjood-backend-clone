@@ -7,10 +7,12 @@
     "dev": "nodemon src/server.ts",
     "build": "prisma generate && tsc",
     "postinstall": "prisma generate",
+    "vercel-build": "prisma migrate deploy && prisma generate && tsc",
     "start": "node dist/server.js",
     "vercel-start": "npm run build && node dist/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "prisma:seed": "ts-node prisma/seed.ts"
   },
