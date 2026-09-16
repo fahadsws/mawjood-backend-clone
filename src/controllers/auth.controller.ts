@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import axios, { isAxiosError } from 'axios';
 import { OAuth2Client } from 'google-auth-library';
 import type { Prisma } from '@prisma/client';
 import prisma from '../config/database';
@@ -6,7 +7,7 @@ import prisma from '../config/database';
 // import { hashPassword, comparePassword } from '../utils/password.util';
 import { generateToken, generateRefreshToken } from '../utils/jwt.util';
 import { sendSuccess, sendError } from '../utils/response.util';
-import { generateOTP, storeOTP, verifyOTP, sendEmailOTP, sendPhoneOTP, storeRegistrationData, getRegistrationData } from '../utils/otp.util';
+import { generateOTP, storeOTP, verifyOTP, sendEmailOTP, storeRegistrationData, getRegistrationData } from '../utils/otp.util';
 import { AuthRequest, SocialLoginDTO, OTPRequestDTO } from '../types';
 import { capitalizeUserNames } from '../utils/name.util';
 
@@ -172,11 +173,9 @@ export const sendPhoneOTPController = async (req: Request, res: Response) => {
         return sendError(res, 403, 'Account is suspended or inactive');
       }
 
-      // Static OTP for phone: 12345
-      const otp = '12345';
+      const otp = generateOTP();
+      await sendOurSmsOTP(phone, otp);
       storeOTP(phone, otp);
-      // Skip actual SMS sending for testing
-      // await sendPhoneOTP(phone, otp);
 
       return sendSuccess(res, 200, 'OTP sent to phone successfully', { 
         phone,
@@ -202,11 +201,9 @@ export const sendPhoneOTPController = async (req: Request, res: Response) => {
         lastName,
       });
 
-      // Static OTP for phone: 12345
-      const otp = '12345';
+      const otp = generateOTP();
+      await sendOurSmsOTP(phone, otp);
       storeOTP(phone, otp);
-      // Skip actual SMS sending for testing
-      // await sendPhoneOTP(phone, otp);
 
       return sendSuccess(res, 200, 'OTP sent to phone successfully', { 
         phone,
@@ -573,5 +570,51 @@ export const socialLogin = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Social login error:', error);
     return sendError(res, 500, 'Failed to authenticate with social provider', error);
+  }
+};
+
+const sendOurSmsOTP = async (phone: string, otp: string): Promise<void> => {
+  const apiToken = process.env.OURSMS_API_TOKEN;
+  const senderId = process.env.OURSMS_SENDER_ID;
+
+  if (!apiToken || !senderId) {
+    throw new Error(
+      'OurSMS is not configured. Set OURSMS_API_TOKEN and OURSMS_SENDER_ID.',
+    );
+  }
+
+  const destination = phone.replace(/[\s()-]/g, '').replace(/^\+/, '');
+  const message = process.env.OURSMS_OTP_MESSAGE || 'Your Mawjood verification code is: {{1}}';
+
+  try {
+    await axios.post(
+      process.env.OURSMS_API_URL || 'https://api.oursms.com/msgs/sms',
+      {
+        src: senderId,
+        dests: [destination],
+        body: message,
+        vars: { '1': otp },
+        msgClass: 'transactional',
+        secure: true,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${apiToken}`,
+          'Content-Type': 'application/json',
+        },
+        timeout: 15000,
+      },
+    );
+  } catch (error) {
+    if (isAxiosError(error)) {
+      console.error('OurSMS request failed:', {
+        status: error.response?.status ?? 'no response',
+        responseBody: error.response?.data ?? error.message,
+      });
+      throw new Error(`OurSMS rejected the SMS request (${error.response?.status ?? 'network error'})`);
+    }
+
+    console.error('OurSMS network error:', error);
+    throw new Error('Unable to connect to OurSMS');
   }
 };
