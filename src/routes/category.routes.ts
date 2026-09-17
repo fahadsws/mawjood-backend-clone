@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   getAllCategories,
+  getPopularCategories,
   getCategoryById,
   getCategoryBySlug,
   createCategory,
@@ -14,6 +15,7 @@ const router = Router();
 
 // Public routes
 router.get('/', getAllCategories);
+router.get('/popular', getPopularCategories);
 router.get('/:id', getCategoryById);
 router.get('/slug/:slug', getCategoryBySlug);
 

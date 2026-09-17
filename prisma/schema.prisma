@@ -80,103 +80,103 @@ enum EnquiryStatus {
 }
 
 model User {
-  id            String      @id @default(cuid())
-  email         String?     @unique
-  phone         String?     @unique
+  id            String     @id @default(cuid())
+  email         String?    @unique
+  phone         String?    @unique
   password      String
   firstName     String
   lastName      String
-  role          UserRole    @default(USER)
-  status        UserStatus  @default(ACTIVE)
+  role          UserRole   @default(USER)
+  status        UserStatus @default(ACTIVE)
   avatar        String?
-  emailVerified Boolean     @default(false)
-  phoneVerified Boolean     @default(false)
-  
-  notifications Notification[]
-  businesses    Business[]
-  reviews       Review[]
-  favourites    Favourite[]
-  payments      Payment[]
-  blogs         Blog[]
+  emailVerified Boolean    @default(false)
+  phoneVerified Boolean    @default(false)
+
+  notifications            Notification[]
+  businesses               Business[]
+  reviews                  Review[]
+  favourites               Favourite[]
+  payments                 Payment[]
+  blogs                    Blog[]
   createdSubscriptionPlans SubscriptionPlan[]
   createdSubscriptions     BusinessSubscription[]
-  createdAdvertisements Advertisement[]
-  createdTouristPlaces TouristPlace[]
-  enquiries     Enquiry[]
-  
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  
+  createdAdvertisements    Advertisement[]
+  createdTouristPlaces     TouristPlace[]
+  enquiries                Enquiry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([email])
   @@index([phone])
 }
 
 model Category {
-  id          String     @id @default(cuid())
-  name        String     @unique
-  slug        String     @unique
+  id          String  @id @default(cuid())
+  name        String  @unique
+  slug        String  @unique
   description String?
   icon        String?
   image       String?
-  order       Int        @default(0)
-  
-  parentId    String?
-  parent      Category?  @relation("CategorySubcategories", fields: [parentId], references: [id], onDelete: Cascade)
+  order       Int     @default(0)
+
+  parentId      String?
+  parent        Category?  @relation("CategorySubcategories", fields: [parentId], references: [id], onDelete: Cascade)
   subcategories Category[] @relation("CategorySubcategories")
-  
-  businesses  Business[]
+
+  businesses     Business[]
   advertisements Advertisement[]
-  
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([slug])
   @@index([parentId])
 }
 
 model Region {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  slug      String   @unique
+  id        String  @id @default(cuid())
+  name      String  @unique
+  slug      String  @unique
   countryId String
-  country   Country  @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  country   Country @relation(fields: [countryId], references: [id], onDelete: Cascade)
 
-  cities    City[]
+  cities         City[]
   advertisements Advertisement[]
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([slug])
   @@index([countryId])
 }
 
 model City {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  
-  regionId  String
-  region    Region   @relation(fields: [regionId], references: [id], onDelete: Cascade)
-  
-  businesses Business[]
+  id   String @id @default(cuid())
+  name String
+  slug String @unique
+
+  regionId String
+  region   Region @relation(fields: [regionId], references: [id], onDelete: Cascade)
+
+  businesses     Business[]
   advertisements Advertisement[]
-  touristPlaces TouristPlace[]
-  
+  touristPlaces  TouristPlace[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([slug])
   @@index([regionId])
 }
 
 model Country {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  slug      String   @unique
-  code      String?  @unique
+  id   String  @id @default(cuid())
+  name String  @unique
+  slug String  @unique
+  code String? @unique
 
-  regions   Region[]
+  regions        Region[]
   advertisements Advertisement[]
 
   createdAt DateTime @default(now())
@@ -187,59 +187,59 @@ model Country {
 }
 
 model Business {
-  id              String         @id @default(cuid())
-  name            String
-  slug            String         @unique
-  description     String?        @db.LongText
-  email           String
-  phone           String
-  whatsapp        String?
-  website         String?
-  address         String
-  latitude        Float?
-  longitude       Float?
-  crNumber        String?
-  crVerified      Boolean        @default(false)
-  images          Json?
-  logo            String?
-  logoAlt         String?
-  coverImage      String?
-  coverImageAlt   String?
-  metaTitle       String?
-  metaDescription String?
-  keywords        Json?
-  status          BusinessStatus @default(PENDING)
-  averageRating   Float          @default(0)
-  totalReviews    Int            @default(0)
-  workingHours    Json?
-  isVerified      Boolean        @default(false)
-  currentSubscriptionId String?  @unique
-  subscriptionStartedAt DateTime?
-  subscriptionExpiresAt DateTime?
-  canCreateAdvertisements Boolean @default(false)
-  promotedUntil DateTime?
-  
-  userId          String
-  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  categoryId      String
-  category        Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  
-  cityId          String
-  city            City           @relation(fields: [cityId], references: [id], onDelete: Restrict)
-  
-  views           BusinessView[]
-  services        Service[]
-  reviews         Review[]
-  favourites      Favourite[]
-  payments        Payment[]
-  subscriptions   BusinessSubscription[] @relation("BusinessSubscriptions")
-  currentSubscription BusinessSubscription? @relation("BusinessCurrentSubscription", fields: [currentSubscriptionId], references: [id])
-  enquiries       Enquiry[]
-  
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  
+  id                      String         @id @default(cuid())
+  name                    String
+  slug                    String         @unique
+  description             String?        @db.LongText
+  email                   String
+  phone                   String
+  whatsapp                String?
+  website                 String?
+  address                 String
+  latitude                Float?
+  longitude               Float?
+  crNumber                String?
+  crVerified              Boolean        @default(false)
+  images                  Json?
+  logo                    String?
+  logoAlt                 String?
+  coverImage              String?
+  coverImageAlt           String?
+  metaTitle               String?
+  metaDescription         String?
+  keywords                Json?
+  status                  BusinessStatus @default(PENDING)
+  averageRating           Float          @default(0)
+  totalReviews            Int            @default(0)
+  workingHours            Json?
+  isVerified              Boolean        @default(false)
+  currentSubscriptionId   String?        @unique
+  subscriptionStartedAt   DateTime?
+  subscriptionExpiresAt   DateTime?
+  canCreateAdvertisements Boolean        @default(false)
+  promotedUntil           DateTime?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  cityId String
+  city   City   @relation(fields: [cityId], references: [id], onDelete: Restrict)
+
+  views               BusinessView[]
+  services            Service[]
+  reviews             Review[]
+  favourites          Favourite[]
+  payments            Payment[]
+  subscriptions       BusinessSubscription[] @relation("BusinessSubscriptions")
+  currentSubscription BusinessSubscription?  @relation("BusinessCurrentSubscription", fields: [currentSubscriptionId], references: [id])
+  enquiries           Enquiry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([slug])
   @@index([userId])
   @@index([categoryId])
@@ -248,39 +248,39 @@ model Business {
 }
 
 model Service {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
-  description String?  @db.LongText
+  description String? @db.LongText
   price       Float
-  currency    String   @default("SAR")
+  currency    String  @default("SAR")
   duration    Int?
   image       String?
   youtubeUrl  String?
-  
-  businessId  String
-  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([businessId])
 }
 
 model Review {
-  id                 String   @id @default(cuid())
-  rating             Int
-  comment            String?  @db.LongText
-  deleteRequestStatus String?  // PENDING, APPROVED, REJECTED, null
-  
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id                  String  @id @default(cuid())
+  rating              Int
+  comment             String? @db.LongText
+  deleteRequestStatus String? // PENDING, APPROVED, REJECTED, null
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([userId, businessId])
   @@index([businessId])
   @@index([userId])
@@ -288,16 +288,16 @@ model Review {
 }
 
 model Favourite {
-  id         String   @id @default(cuid())
-  
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  
-  createdAt  DateTime @default(now())
-  
+
+  createdAt DateTime @default(now())
+
   @@unique([userId, businessId])
   @@index([userId])
   @@index([businessId])
@@ -311,55 +311,55 @@ model Payment {
   paymentMethod String?
   transactionId String?       @unique
   description   String?
-  
-  userId        String
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  businessId    String
-  business      Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([userId])
   @@index([businessId])
   @@index([status])
 }
 
 model Blog {
-  id              String   @id @default(cuid())
+  id              String  @id @default(cuid())
   title           String
-  slug            String   @unique
-  content         String   @db.LongText
+  slug            String  @unique
+  content         String  @db.LongText
   image           String?
   metaTitle       String?
   metaDescription String?
   tags            Json?
-  published       Boolean  @default(false)
-  
-  authorId        String
-  author          User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  published       Boolean @default(false)
 
-  categories      BlogCategory[] @relation("BlogCategories")
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  categories BlogCategory[] @relation("BlogCategories")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([slug])
   @@index([authorId])
   @@index([published])
 }
 
 model BlogCategory {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
-  slug        String   @unique
+  slug        String  @unique
   description String?
 
-  blogs       Blog[]   @relation("BlogCategories")
+  blogs Blog[] @relation("BlogCategories")
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([slug])
   @@index([name])
@@ -371,26 +371,26 @@ model BusinessView {
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
   ipAddress  String?
   viewedAt   DateTime @default(now())
-  
+
   @@index([businessId, viewedAt])
   @@index([ipAddress, businessId])
 }
 
 model Notification {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  type      String   // 'BUSINESS_APPROVED', 'BUSINESS_VERIFIED', 'NEW_REVIEW', 'BUSINESS_REJECTED'
-  title     String
-  message   String   @db.Text
-  link      String?  // Optional link to redirect
-  
-  isRead    Boolean  @default(false)
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type    String // 'BUSINESS_APPROVED', 'BUSINESS_VERIFIED', 'NEW_REVIEW', 'BUSINESS_REJECTED'
+  title   String
+  message String  @db.Text
+  link    String? // Optional link to redirect
+
+  isRead Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([userId])
   @@index([isRead])
   @@index([createdAt])
@@ -413,34 +413,34 @@ model SiteSettings {
 }
 
 model Advertisement {
-  id          String           @id @default(cuid())
-  title       String
-  imageUrl    String
-  targetUrl   String?
-  openInNewTab Boolean         @default(true)
-  adType      AdvertisementType @default(CATEGORY)
-  isActive    Boolean          @default(true)
-  startsAt    DateTime?
-  endsAt      DateTime?
-  notes       String?
+  id           String            @id @default(cuid())
+  title        String
+  imageUrl     String
+  targetUrl    String?
+  openInNewTab Boolean           @default(true)
+  adType       AdvertisementType @default(CATEGORY)
+  isActive     Boolean           @default(true)
+  startsAt     DateTime?
+  endsAt       DateTime?
+  notes        String?
 
-  countryId   String?
-  country     Country?  @relation(fields: [countryId], references: [id], onDelete: SetNull)
+  countryId String?
+  country   Country? @relation(fields: [countryId], references: [id], onDelete: SetNull)
 
-  regionId    String?
-  region      Region?   @relation(fields: [regionId], references: [id], onDelete: SetNull)
+  regionId String?
+  region   Region? @relation(fields: [regionId], references: [id], onDelete: SetNull)
 
-  cityId      String?
-  city        City?     @relation(fields: [cityId], references: [id], onDelete: SetNull)
+  cityId String?
+  city   City?   @relation(fields: [cityId], references: [id], onDelete: SetNull)
 
-  categoryId  String?
-  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   createdById String?
-  createdBy   User?     @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([cityId, categoryId])
   @@index([regionId, categoryId])
@@ -450,36 +450,37 @@ model Advertisement {
 }
 
 model SubscriptionPlan {
-  id                     String   @id @default(cuid())
-  name                   String
-  slug                   String   @unique
-  description            String?  @db.Text
-  price                  Decimal  @db.Decimal(10, 2)
-  salePrice              Decimal? @db.Decimal(10, 2)
-  currency               String   @default("SAR")
-  status                 PlanStatus @default(ACTIVE)
-  billingInterval        SubscriptionInterval @default(MONTH)
-  intervalCount          Int      @default(1)
-  customIntervalDays     Int?
-  isSponsorPlan          Boolean  @default(false) // Admin-only sponsor plan, not visible to public
-  verifiedBadge          Boolean  @default(false)
-  topPlacement           Boolean  @default(false)
-  allowAdvertisements    Boolean  @default(false)
-  maxAdvertisements      Int?
-  couponCode             String?
-  couponType             DiscountType @default(NONE)
-  couponValue            Decimal? @db.Decimal(10, 2)
-  couponMaxDiscount      Decimal? @db.Decimal(10, 2)
-  couponStartsAt         DateTime?
-  couponEndsAt           DateTime?
-  couponUsageLimit       Int?
-  notes                  String?  @db.Text
-  metadata               Json?
-  createdById            String?
-  createdBy              User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
-  subscriptions          BusinessSubscription[]
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  id                  String                 @id @default(cuid())
+  name                String
+  slug                String                 @unique
+  description         String?                @db.Text
+  price               Decimal                @db.Decimal(10, 2)
+  salePrice           Decimal?               @db.Decimal(10, 2)
+  currency            String                 @default("SAR")
+  status              PlanStatus             @default(ACTIVE)
+  billingInterval     SubscriptionInterval   @default(MONTH)
+  intervalCount       Int                    @default(1)
+  customIntervalDays  Int?
+  isSponsorPlan       Boolean                @default(false) // Admin-only sponsor plan, not visible to public
+  verifiedBadge       Boolean                @default(false)
+  topPlacement        Boolean                @default(false)
+  allowAdvertisements Boolean                @default(false)
+  features            Json?
+  maxAdvertisements   Int?
+  couponCode          String?
+  couponType          DiscountType           @default(NONE)
+  couponValue         Decimal?               @db.Decimal(10, 2)
+  couponMaxDiscount   Decimal?               @db.Decimal(10, 2)
+  couponStartsAt      DateTime?
+  couponEndsAt        DateTime?
+  couponUsageLimit    Int?
+  notes               String?                @db.Text
+  metadata            Json?
+  createdById         String?
+  createdBy           User?                  @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  subscriptions       BusinessSubscription[]
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
 
   @@index([status])
   @@index([billingInterval, intervalCount])
@@ -487,27 +488,27 @@ model SubscriptionPlan {
 }
 
 model BusinessSubscription {
-  id               String   @id @default(cuid())
-  businessId       String
-  planId           String
-  status           SubscriptionStatus @default(PENDING)
-  startedAt        DateTime @default(now())
-  endsAt           DateTime
-  cancelledAt      DateTime?
-  price            Decimal? @db.Decimal(10, 2)
-  discountAmount   Decimal? @db.Decimal(10, 2)
-  totalAmount      Decimal? @db.Decimal(10, 2)
-  paymentReference String?
-  paymentProvider  String?
-  notes            String?  @db.Text
-  metadata         Json?
-  business         Business @relation("BusinessSubscriptions", fields: [businessId], references: [id])
-  plan             SubscriptionPlan @relation(fields: [planId], references: [id])
-  currentForBusiness Business? @relation("BusinessCurrentSubscription")
-  createdById      String?
-  createdBy        User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                 String             @id @default(cuid())
+  businessId         String
+  planId             String
+  status             SubscriptionStatus @default(PENDING)
+  startedAt          DateTime           @default(now())
+  endsAt             DateTime
+  cancelledAt        DateTime?
+  price              Decimal?           @db.Decimal(10, 2)
+  discountAmount     Decimal?           @db.Decimal(10, 2)
+  totalAmount        Decimal?           @db.Decimal(10, 2)
+  paymentReference   String?
+  paymentProvider    String?
+  notes              String?            @db.Text
+  metadata           Json?
+  business           Business           @relation("BusinessSubscriptions", fields: [businessId], references: [id])
+  plan               SubscriptionPlan   @relation(fields: [planId], references: [id])
+  currentForBusiness Business?          @relation("BusinessCurrentSubscription")
+  createdById        String?
+  createdBy          User?              @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
   @@index([businessId, status])
   @@index([planId, status])
@@ -515,93 +516,131 @@ model BusinessSubscription {
 }
 
 model TouristPlace {
-  id              String   @id @default(cuid())
+  id              String  @id @default(cuid())
   title           String
-  slug            String   @unique
-  subtitle        String?  // "Welcome to the Capital City of India"
-  galleryImages   Json?    // Array of image URLs
-  about           String?  @db.LongText
+  slug            String  @unique
+  subtitle        String? // "Welcome to the Capital City of India"
+  galleryImages   Json? // Array of image URLs
+  about           String? @db.LongText
   metaTitle       String?
   metaDescription String?
   keywords        Json?
-  isActive        Boolean  @default(true)
-  
-  cityId          String
-  city            City     @relation(fields: [cityId], references: [id], onDelete: Cascade)
-  
-  bestTimeToVisit Json?    // { winter: {...}, summer: {...}, monsoon: {...} }
-  
-  createdById     String?
-  createdBy       User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
-  
-  attractions     TouristPlaceAttraction[]
+  isActive        Boolean @default(true)
+
+  cityId String
+  city   City   @relation(fields: [cityId], references: [id], onDelete: Cascade)
+
+  bestTimeToVisit Json? // { winter: {...}, summer: {...}, monsoon: {...} }
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  attractions      TouristPlaceAttraction[]
   businessSections TouristPlaceBusinessSection[]
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([slug])
   @@index([cityId])
   @@index([isActive])
 }
 
 model TouristPlaceAttraction {
-  id              String   @id @default(cuid())
-  name            String
-  image           String
-  rating          Float?   @default(0)
-  description     String?  @db.Text
-  openTime        String?  // e.g., "09:30 am"
-  closeTime       String?  // e.g., "05:30 pm"
-  status          String?  // e.g., "Open now", "Closed", "Opens at 09:30 am Tomorrow"
-  order           Int      @default(0)
-  
-  touristPlaceId  String
-  touristPlace    TouristPlace @relation(fields: [touristPlaceId], references: [id], onDelete: Cascade)
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  id          String  @id @default(cuid())
+  name        String
+  image       String
+  rating      Float?  @default(0)
+  description String? @db.Text
+  openTime    String? // e.g., "09:30 am"
+  closeTime   String? // e.g., "05:30 pm"
+  status      String? // e.g., "Open now", "Closed", "Opens at 09:30 am Tomorrow"
+  order       Int     @default(0)
+
+  touristPlaceId String
+  touristPlace   TouristPlace @relation(fields: [touristPlaceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([touristPlaceId, order])
 }
 
 model TouristPlaceBusinessSection {
-  id              String   @id @default(cuid())
-  title           String   // e.g., "Top Hotels in Delhi", "Top Restaurants in Riyadh"
-  categoryIds     Json     // Array of category IDs to filter businesses
-  order           Int      @default(0)
-  
-  touristPlaceId  String
-  touristPlace    TouristPlace @relation(fields: [touristPlaceId], references: [id], onDelete: Cascade)
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  id          String @id @default(cuid())
+  title       String // e.g., "Top Hotels in Delhi", "Top Restaurants in Riyadh"
+  categoryIds Json // Array of category IDs to filter businesses
+  order       Int    @default(0)
+
+  touristPlaceId String
+  touristPlace   TouristPlace @relation(fields: [touristPlaceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([touristPlaceId, order])
 }
 
 model Enquiry {
-  id            String        @id @default(cuid())
-  name          String
-  phone         String
-  email         String
-  message       String?       @db.Text
-  status        EnquiryStatus @default(OPEN)
-  response      String?       @db.Text
-  responseDate  DateTime?
-  
-  userId        String
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  businessId   String
-  business      Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  
+  id           String        @id @default(cuid())
+  name         String
+  phone        String
+  email        String
+  message      String?       @db.Text
+  status       EnquiryStatus @default(OPEN)
+  response     String?       @db.Text
+  responseDate DateTime?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([userId])
   @@index([businessId])
   @@index([status])
   @@index([createdAt])
   @@index([businessId, status])
+}
+
+enum EmploymentType {
+  PART_TIME
+  FULL_TIME
+}
+
+model CareerOpening {
+  id             String              @id @default(cuid())
+  title          String
+  slug           String              @unique
+  description    String              @db.LongText
+  requirements   Json?
+  employmentType EmploymentType
+  isActive       Boolean             @default(true)
+  applications   CareerApplication[]
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@index([isActive])
+  @@index([createdAt])
+}
+
+model CareerApplication {
+  id              String        @id @default(cuid())
+  careerOpeningId String
+  careerOpening   CareerOpening @relation(fields: [careerOpeningId], references: [id], onDelete: Cascade)
+  name            String
+  email           String
+  phone           String?
+  resumeUrl       String?
+  coverLetter     String?       @db.Text
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([careerOpeningId])
+  @@index([email])
+  @@index([createdAt])
 }

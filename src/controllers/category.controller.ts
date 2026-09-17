@@ -33,6 +33,16 @@ const clearCategoryCache = () => {
   }
 };
 
+export const getPopularCategories = async (_req: Request, res: Response) => {
+  try {
+    const categories = await prisma.category.findMany({
+      where: { parentId: null }, orderBy: { order: 'asc' }, take: 4,
+      select: { id: true, name: true, slug: true, description: true, icon: true, image: true, order: true },
+    });
+    return sendSuccess(res, 200, 'Popular categories fetched successfully', categories);
+  } catch (error) { console.error('Get popular categories error:', error); return sendError(res, 500, 'Failed to fetch popular categories', error); }
+};
+
 // Get all categories with subcategories
 export const getAllCategories = async (req: Request, res: Response) => {
   try {
