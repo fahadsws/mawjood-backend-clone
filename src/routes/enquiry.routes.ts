@@ -6,6 +6,7 @@ import {
   updateEnquiryStatus,
   getUserEnquiries,
   getAllEnquiries,
+  bulkUpdateEnquiryStatus,
 } from '../controllers/enquiry.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 
@@ -22,6 +23,7 @@ router.get('/business', authenticate, getBusinessEnquiries);
 
 // Admin routes - Get all enquiries
 router.get('/admin/all', authenticate, authorize('ADMIN'), getAllEnquiries);
+router.patch('/admin/bulk-status', authenticate, authorize('ADMIN'), bulkUpdateEnquiryStatus);
 
 // Get single enquiry
 router.get('/:id', authenticate, getEnquiryById);

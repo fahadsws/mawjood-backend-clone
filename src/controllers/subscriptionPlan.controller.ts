@@ -35,6 +35,7 @@ export const createSubscriptionPlan = async (req: Request, res: Response) => {
       verifiedBadge,
       topPlacement,
       allowAdvertisements,
+      features,
       maxAdvertisements,
       couponCode,
       couponType,
@@ -99,6 +100,7 @@ export const createSubscriptionPlan = async (req: Request, res: Response) => {
       topPlacement: topPlacement === undefined ? false : topPlacement === true || topPlacement === 'true',
       allowAdvertisements:
         allowAdvertisements === undefined ? false : allowAdvertisements === true || allowAdvertisements === 'true',
+      features: features ?? null,
       maxAdvertisements: parseIntValue(maxAdvertisements),
       couponCode,
       couponType,
@@ -158,6 +160,7 @@ export const updateSubscriptionPlan = async (req: Request, res: Response) => {
       verifiedBadge,
       topPlacement,
       allowAdvertisements,
+      features,
       maxAdvertisements,
       couponCode,
       couponType,
@@ -192,6 +195,7 @@ export const updateSubscriptionPlan = async (req: Request, res: Response) => {
           allowAdvertisements !== undefined
             ? allowAdvertisements === true || allowAdvertisements === 'true'
             : undefined,
+        features: features !== undefined ? features : undefined,
         maxAdvertisements: maxAdvertisements !== undefined ? parseIntValue(maxAdvertisements) : undefined,
         couponCode,
         couponType,
@@ -292,7 +296,7 @@ export const getSubscriptionPlans = async (req: Request, res: Response) => {
         plans = await prismaClient.$queryRawUnsafe(`
           SELECT id, name, slug, description, price, salePrice, currency, status, 
                  billingInterval, intervalCount, customIntervalDays, 
-                 verifiedBadge, topPlacement, allowAdvertisements, maxAdvertisements,
+                 verifiedBadge, topPlacement, allowAdvertisements, features, maxAdvertisements,
                  couponCode, couponType, couponValue, couponMaxDiscount, 
                  couponStartsAt, couponEndsAt, couponUsageLimit, notes, metadata, 
                  createdById, createdAt, updatedAt

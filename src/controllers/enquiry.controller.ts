@@ -524,6 +524,38 @@ export const updateEnquiryStatus = async (req: AuthRequest, res: Response) => {
   }
 };
 
+/** Bulk update enquiry status (Admin only) */
+export const bulkUpdateEnquiryStatus = async (req: AuthRequest, res: Response) => {
+  try {
+    const { enquiryIds, status, response } = req.body;
+
+    if (!Array.isArray(enquiryIds) || enquiryIds.length === 0) {
+      return sendError(res, 400, 'enquiryIds must be a non-empty array');
+    }
+    if (!status || !Object.values(EnquiryStatus).includes(status)) {
+      return sendError(res, 400, 'Valid status is required');
+    }
+
+    const result = await prismaClient.enquiry.updateMany({
+      where: { id: { in: enquiryIds.filter((id: unknown) => typeof id === 'string') } },
+      data: {
+        status,
+        ...(response !== undefined && {
+          response: response || null,
+          responseDate: response ? new Date() : null,
+        }),
+      },
+    });
+
+    return sendSuccess(res, 200, 'Enquiries updated successfully', {
+      updatedCount: result.count,
+    });
+  } catch (error) {
+    console.error('Bulk update enquiry status error:', error);
+    return sendError(res, 500, 'Failed to update enquiries', error);
+  }
+};
+
 /**
  * Get all enquiries (Admin only)
  */

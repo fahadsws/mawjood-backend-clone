@@ -25,6 +25,7 @@ import contactRoutes from './routes/contact.routes';
 import crRoutes from './routes/cr.routes';
 import touristPlaceRoutes from './routes/touristPlace.routes';
 import enquiryRoutes from './routes/enquiry.routes';
+import careerRoutes from './routes/career.routes';
 
 // Import routes
 import authRoutes from './routes/auth.routes';
@@ -76,6 +77,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/cr', crRoutes);
 app.use('/api/tourist-places', touristPlaceRoutes);
 app.use('/api/enquiries', enquiryRoutes);
+app.use('/api/careers', careerRoutes);
 app.use('/', sitemapRoutes);
 
 // Health check
