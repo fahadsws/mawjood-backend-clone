@@ -1,36 +1,68 @@
-import { v2 as cloudinary } from 'cloudinary';
-import { Readable } from 'stream';
+import axios from 'axios';
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Kept in this file and under the old export name to avoid changing every
+// controller at once. The implementation now delegates storage to the
+// separate PHP upload server.
+const getUploadConfig = () => {
+  const uploadUrl = process.env.REMOTE_UPLOAD_URL?.trim();
+  const uploadKey = process.env.REMOTE_UPLOAD_KEY?.trim();
+
+  if (!uploadUrl || !uploadKey) {
+    throw new Error(
+      'Remote upload is not configured. Set REMOTE_UPLOAD_URL and REMOTE_UPLOAD_KEY.',
+    );
+  }
+
+  return {
+    uploadUrl,
+    uploadKey,
+    timeout: Number(process.env.REMOTE_UPLOAD_TIMEOUT_MS || 30_000),
+  };
+};
 
 export const uploadToCloudinary = async (
   file: Express.Multer.File,
   folder: string
 ): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    // Upload from buffer instead of file path
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: folder,
-        resource_type: 'auto',
-      },
-      (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result!.secure_url);
-        }
-      }
-    );
+  if (!file?.buffer || file.buffer.length === 0) {
+    throw new Error('Upload file is empty');
+  }
 
-    // Convert buffer to stream and pipe to cloudinary
-    const bufferStream = Readable.from(file.buffer);
-    bufferStream.pipe(uploadStream);
+  const config = getUploadConfig();
+  const form = new FormData();
+  const blob = new Blob([file.buffer], {
+    type: file.mimetype || 'application/octet-stream',
   });
-};
 
-export default cloudinary;
+  form.append('folder', folder);
+  form.append('file', blob, file.originalname || 'upload');
+
+  try {
+    const response = await axios.post(config.uploadUrl, form, {
+      headers: {
+        'X-Upload-Key': config.uploadKey,
+      },
+      timeout: config.timeout,
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+      validateStatus: () => true,
+    });
+
+    const responseData = response.data as {
+      success?: boolean;
+      url?: string;
+      message?: string;
+    };
+
+    if (response.status < 200 || response.status >= 300 || !responseData?.success || !responseData.url) {
+      throw new Error(
+        responseData?.message || `Remote upload failed with status ${response.status}`,
+      );
+    }
+
+    return responseData.url;
+  } catch (error: any) {
+    const message = error?.response?.data?.message || error?.message || 'Remote upload failed';
+    throw new Error(`Remote upload failed: ${message}`);
+  }
+};

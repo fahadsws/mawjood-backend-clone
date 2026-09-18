@@ -1413,6 +1413,7 @@ export const updateBusiness = async (req: AuthRequest, res: Response) => {
       logoAlt,
       coverImageAlt,
       imageAlts, // JSON string array of alt tags for gallery images
+      existingImages, // JSON string array of gallery images to retain
     } = req.body;
 
     // Handle file uploads
@@ -1439,7 +1440,31 @@ export const updateBusiness = async (req: AuthRequest, res: Response) => {
       coverImageAlt: coverImageAlt !== undefined ? (coverImageAlt || null) : undefined,
     };
 
-    if (files) {
+    // When supplied, existingImages is the authoritative list to retain.
+    // Omitting an image from this list removes it from the database gallery.
+    let retainedImages: Array<{ url: string; alt: string }> | undefined;
+    if (existingImages !== undefined) {
+      try {
+        const parsedExistingImages = typeof existingImages === 'string'
+          ? JSON.parse(existingImages)
+          : existingImages;
+
+        if (!Array.isArray(parsedExistingImages)) {
+          return sendError(res, 400, 'existingImages must be a JSON array');
+        }
+
+        retainedImages = parsedExistingImages
+          .filter((img: any) => typeof img === 'string' || img?.url)
+          .map((img: any) => ({
+            url: typeof img === 'string' ? img : img.url,
+            alt: typeof img === 'string' ? '' : (img.alt || ''),
+          }));
+      } catch (e) {
+        return sendError(res, 400, 'existingImages must be valid JSON');
+      }
+    }
+
+    if (files || retainedImages !== undefined) {
       if (files.logo && files.logo[0]) {
         updateData.logo = await uploadToCloudinary(files.logo[0], 'businesses/logos');
       }
@@ -1468,15 +1493,19 @@ export const updateBusiness = async (req: AuthRequest, res: Response) => {
           })
         );
 
-        // Get existing images - handle both old format (string[]) and new format (object[])
+        // Use the client-provided retained list when present. Otherwise, keep
+        // the existing database images for backward compatibility.
         const existingImagesRaw = existingBusiness.images || [];
-        const existingImages = Array.isArray(existingImagesRaw) 
+        const databaseImages = Array.isArray(existingImagesRaw)
           ? existingImagesRaw.map((img: any) => 
               typeof img === 'string' ? { url: img, alt: '' } : img
             )
           : [];
 
-        updateData.images = [...existingImages, ...imageUploads];
+        updateData.images = [...(retainedImages ?? databaseImages), ...imageUploads];
+      } else if (retainedImages !== undefined) {
+        // No new files: replace the gallery with exactly what the client kept.
+        updateData.images = retainedImages;
       } else if (imageAlts) {
         // Update alt tags for existing images even if no new files are uploaded
         let parsedImageAlts: string[] = [];
